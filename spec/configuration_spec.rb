@@ -7,7 +7,7 @@ RSpec.shared_examples 'a configurable setting' do |method:, env:, default:, samp
   end
 
   it "#{method} can be set with the environment variable #{env}" do
-    ENV[env] = sample_value
+    ENV[env] = sample_value.to_s
     expect(subject.public_send method).not_to eq default
     ENV[env] = nil
   end
@@ -21,6 +21,7 @@ describe Squid::Configuration do
   it_behaves_like 'a configurable setting', method: 'baseline',    env: 'SQUID_BASELINE',    default: true,       sample_value: sample_false
   it_behaves_like 'a configurable setting', method: 'border',      env: 'SQUID_BORDER',      default: false,      sample_value: sample_true
   it_behaves_like 'a configurable setting', method: 'chart',       env: 'SQUID_CHART',       default: true,       sample_value: sample_false
+  it_behaves_like 'a configurable setting', method: 'renderer',    env: 'SQUID_RENDERER',    default: nil,        sample_value: Squid::DefaultRenderer
   it_behaves_like 'a configurable setting', method: 'colors',      env: 'SQUID_COLORS',      default: [],         sample_value: 'ff0000'
   it_behaves_like 'a configurable setting', method: 'every',       env: 'SQUID_EVERY',       default: 1,          sample_value: '2'
   it_behaves_like 'a configurable setting', method: 'formats',     env: 'SQUID_FORMATS',     default: [],         sample_value: 'percentage'

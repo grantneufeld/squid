@@ -24,6 +24,8 @@ module Squid
     #   legend. If a Hash is provided, the `:right` and `:bottom` options can be
     #   set to specify the right and bottom margin of the legend.
     # @option settings [Numeric] :line_width (3) the line width for line graphs.
+    # @option settings [Object] :renderer (DefaultRenderer) custom methods for
+    #   rendering chart elements.
     # @option settings [Numeric] :steps (4) the number of gridlines.
     # @option settings [Boolean] :ticks (true) whether to plot the ticks.
     # @option settings [Symbol] :type (:column) the type of graph.

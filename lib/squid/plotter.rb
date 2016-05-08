@@ -1,5 +1,6 @@
 require 'active_support'
 require 'active_support/core_ext/array/wrap' # for Array#wrap
+require 'squid/default_renderer'
 
 module Squid
   # A Plotter wraps a Prawn::Document object in order to provide new methods
@@ -7,9 +8,10 @@ module Squid
   class Plotter
     attr_accessor :paddings
     # @param [Prawn::Document] a PDF document to wrap in a Plotter instance.
-    def initialize(pdf, bottom:)
+    def initialize(pdf, bottom:, renderer: nil)
       @pdf = pdf
       @bottom = bottom
+      @renderer = renderer || DefaultRenderer
     end
 
     # Draws a bounding box of the given height, rendering the block inside it.
@@ -104,7 +106,7 @@ module Squid
       items(series, options.merge(fill: true, count: series.size)) do |point, w, i, padding|
         item_w = (w - 2 * padding)/ series.size
         x, y = point.index*w + padding + left + i*item_w, point.y + @bottom
-        @pdf.fill_rectangle [x, y], item_w, point.height
+        @renderer.column pdf: @pdf, x: x, y: y, w: item_w, h: point.height
       end
     end
 
@@ -175,7 +177,7 @@ module Squid
       @pdf.text_box label, options.merge(at: [x, @pdf.bounds.height])
       x -= (symbol_padding + size)
       with fill_color: color do
-        @pdf.fill_rectangle [x, @pdf.bounds.height - size], size, size
+        @renderer.legend_box pdf: @pdf, x: x, y: (@pdf.bounds.height - size), w: size, h: size
       end
       x - entry_padding
     end

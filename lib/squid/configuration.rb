@@ -48,6 +48,12 @@ module Squid
       -> (values) { values.split.map{|value| proc ? proc.call(value) : value} }
     end
 
+    def self.object
+      -> (value) { value.is_a?(String) ? eval(value) : value }
+      # WARNING: the passed in configuration value is being trusted with executable code!
+      # we expect it to be a class name, so could potentially do some preflight validation of the string
+    end
+
     ATTRIBUTES = {
       baseline:     {as: boolean,        default: 'true'},
       border:       {as: boolean,        default: 'false'},
@@ -59,6 +65,7 @@ module Squid
       labels:       {as: array(boolean)},
       legend:       {as: boolean,        default: 'true'},
       line_widths:  {as: array(float)},
+      renderer:     {as: object,         default: nil},
       steps:        {as: integer,        default: '4'},
       ticks:        {as: boolean,        default: 'true'},
       type:         {as: symbol,         default: 'column'},

@@ -1,5 +1,41 @@
 require 'spec_helper'
 
+# custom chart element rendering class
+class CustomMaxWidthRenderer < Squid::DefaultRenderer
+  MAX_WIDTH = 20
+  def self.max_width; MAX_WIDTH; end
+  def self.column(pdf:, x:, y:, w:, h:)
+    if w > MAX_WIDTH
+      # adjust x to center the column within the area provided for it
+      x += (w - MAX_WIDTH) / 2
+      # restrict the width to our max width
+      w = MAX_WIDTH
+    end
+    #pdf.fill_rectangle [x, y], w, h
+    super
+  end
+  def initialize(width=20)
+    @max_width = width
+  end
+  def column(pdf:, x:, y:, w:, h:)
+    if w > @max_width
+      # adjust x to center the column within the area provided for it
+      x += (w - @max_width) / 2
+      # restrict the width to our max width
+      w = @max_width
+    end
+    # pdf.fill_rectangle [x, y], w, h
+    super
+  end
+  def legend_box(pdf:, x:, y:, w:, h:)
+    w = 4
+    h = 4
+    super
+  end
+end
+
+
+
 describe 'Prawn::Document#chart' do
   let(:pdf) { Prawn::Document.new }
   let(:chart) { pdf.chart(data, settings); pdf.render }
@@ -52,6 +88,32 @@ describe 'Prawn::Document#chart' do
 
       it 'includes the formatted value labels on top of each item' do
         expect(strings_of chart).to eq %w($50.00 -$30.00 $20.00)
+      end
+    end
+
+    context 'given a custom max-width :renderer class is set' do
+      let(:settings) { options.merge renderer: CustomMaxWidthRenderer }
+      it 'creates the columns within the maximum width' do
+        widths = rectangles_of(chart).map{ |r| r[:width] }
+        expect(widths[0]).to eq CustomMaxWidthRenderer.max_width
+      end
+    end
+
+    context 'given a custom max-width :renderer object is set' do
+      let(:settings) { options.merge renderer: CustomMaxWidthRenderer.new(12) }
+      it 'creates the columns within the maximum width' do
+        widths = rectangles_of(chart).map{ |r| r[:width] }
+        expect(widths[0]).to eq 12
+      end
+      context 'with a legend' do
+        let(:settings) do
+          options.delete :legend
+          options.merge renderer: CustomMaxWidthRenderer.new(123)
+        end
+        it 'renders the legend box' do
+          widths = rectangles_of(chart).map{ |r| r[:width] }
+          expect(widths[0]).to eq 4
+        end
       end
     end
 

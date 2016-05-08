@@ -12,12 +12,13 @@ module Squid
   # @private
   class Graph
     extend Settings
-    has_settings :baseline, :border, :chart, :colors, :every, :formats, :height
-    has_settings :legend, :line_widths, :steps, :ticks, :type, :labels
+    has_settings :baseline, :border, :renderer, :chart, :colors, :every
+    has_settings :formats, :height, :legend, :line_widths, :steps, :ticks
+    has_settings :type, :labels
 
     def initialize(document, data = {}, settings = {})
       @data, @settings = data, settings
-      @plot = Plotter.new document, bottom: bottom
+      @plot = Plotter.new document, bottom: bottom, renderer: renderer
       @plot.paddings = {left: left.width, right: right.width} if @data.any?
     end
 
