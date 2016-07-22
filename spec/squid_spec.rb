@@ -33,7 +33,18 @@ class CustomMaxWidthRenderer < Squid::DefaultRenderer
     super
   end
 end
-
+class CustomAxisLabelRederer < Squid::DefaultRenderer
+  # Replace the axis labels with single upper-case characters
+  CATEGORIES = %w(A B C D E F G H)
+  Y_STAGES = %w(Z Y X W V U T S)
+  def self.axis_label(pdf:, index:, label:, x:, y:, w:, h:, align:)
+    pdf.text_box Y_STAGES[index], {height: h, width: w, at: [x, y], align: align}
+  end
+  def self.category_label(pdf:, index:, label_it: true, label:, x:, y:, w:, h:)
+    pdf.stroke_vertical_line y, y - 2, at: x + w/2
+    pdf.text_box CATEGORIES[index], {height: h, width: w, at: [x, y]} if label_it
+  end
+end
 
 
 describe 'Prawn::Document#chart' do
@@ -114,6 +125,13 @@ describe 'Prawn::Document#chart' do
           widths = rectangles_of(chart).map{ |r| r[:width] }
           expect(widths[0]).to eq 4
         end
+      end
+    end
+
+    context 'given a custom axis-labelling :renderer class is set' do
+      let(:settings) { options.merge renderer: CustomAxisLabelRederer, baseline: true, steps: 4, every: 2 }
+      it 'should use single characters in place of the axis text labels' do
+        expect(strings_of chart).to eq %w(Z Y X W V A C)
       end
     end
 

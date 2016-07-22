@@ -38,6 +38,7 @@ Prawn::ManualBuilder::Example.generate 'squid.pdf' do
       s.example 'legend_offset'
       s.example 'renderer'
       s.example 'renderer_advanced'
+      s.example 'renderer_axis'
     end
 
     p.section 'Multiple series' do |s|

@@ -56,22 +56,23 @@ module Squid
     end
 
     def axis_labels(labels)
-      labels.each do |label|
+      h = 20 # TODO: come up with a better way to determine the axis label height
+      labels.each.with_index do |label, index|
         x = (label.align == :right) ? 0 : @pdf.bounds.right - label.width
-        y = label.y + @bottom + text_options[:height] / 2
-        options = text_options.merge width: label.width, at: [x, y]
-        @pdf.text_box label.label, options.merge(align: label.align)
+        y = label.y + @bottom + h / 2
+        w = label.width
+        @renderer.axis_label pdf: @pdf, index: index, label: label.label, x: x, y: y, w: w, h: h, align: label.align
       end
     end
 
     def categories(labels, every:, ticks:)
+      w = width / labels.count.to_f
+      h = 20 # TODO: come up with a better way to determine the axis label height
+      y = @bottom
       labels.each.with_index do |label, index|
-        w = width / labels.count.to_f
-        x = left + w * (index)
-        padding = 2
-        options = category_options.merge(width: every*w-2*padding, at: [x+padding-w*(every/2.0-0.5), @bottom])
-        @pdf.text_box label, options if (index % every).zero?
-        @pdf.stroke_vertical_line @bottom, @bottom - 2, at: x + w/2 if ticks
+        x = left + (w * index)
+        label_it = (index % every).zero?
+        @renderer.category_label pdf: @pdf, index: index, label_it: label_it, label: label, x: x, y: y, w: w, h: h
       end
     end
 
@@ -122,19 +123,6 @@ module Squid
 
     def width
       @pdf.bounds.width - left - right
-    end
-
-    def category_options
-      text_options.merge align: :center, leading: -3, disable_wrap_by_char: true
-    end
-
-    def text_options
-      options = {}
-      options[:height] = 20
-      options[:size] = 8
-      options[:valign] = :center
-      options[:overflow] = :shrink_to_fit
-      options
     end
 
     def items(series, colors: [], fill: false, count: 1, starting_at: 0, &block)

@@ -23,6 +23,21 @@ class MyAdvancedRenderer < Squid::DefaultRenderer
     super
   end
 end
+class MyAxisRenderer < Squid::DefaultRenderer
+  def self.axis_label(pdf:, index:, label:, x:, y:, w:, h:, align:)
+    pdf.text_box label, {height: h, width: w, at: [x, y], align: align,
+      size: 6 + (index * 2), valign: :center}
+  end
+  def self.category_label(pdf:, index:, label_it: true, label:, x:, y:, w:, h:)
+    unless label_it
+      save_color = pdf.fill_color
+      pdf.fill_color "aaaaaa"
+    end
+    pdf.text_box label, {height: h, width: w - 4, at: [x + 2, y],
+      align: :center, valign: :center, size: 8}
+    pdf.fill_color save_color unless label_it
+  end
+end
 
 require 'prawn/manual_builder'
 Prawn::ManualBuilder.manual_dir = File.dirname(__FILE__)
